@@ -45,6 +45,16 @@ pipeline{
                 sh 'mvn checkstyle:checkstyle'
             }
         }
+
+        stage('Static code analysis'){
+
+            steps{
+                withSonarQubeEnv(credentialsId: 'MySonarToken') {
+                    sh 'mvn clean package sonar:sonar'
+                }
+}
+            }
+        }
     }
 
 }
