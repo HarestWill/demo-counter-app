@@ -103,6 +103,23 @@ pipeline{
                 }
             }
         }
+
+        stage('Push Image to DockerHub'){
+
+            steps{
+
+                script{
+                    withCredentials([string(credentialsId: 'git_creds', variable: 'docker_hub_cred')]) {
+
+                        sh 'docker login -u harest -p $(docker_hub_cred)'
+                        sh 'docker image push harest/$JOB_NAME:v1.$BUILD_ID'
+                        sh 'docker image push harest/$JOB_NAME:latest'
+ 
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }
