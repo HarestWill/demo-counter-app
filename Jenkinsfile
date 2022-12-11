@@ -90,6 +90,19 @@ pipeline{
                 }
             }
         }
+
+        stage('Docker Image build'){
+
+            steps{
+
+                script {
+                    sh 'docker image build -t $JOB_NAME:v1.$BUILD_ID'
+                    sh 'docker image tag $JOB_NAME:v1.$BUILD_ID harest/$JOB_NAME:v1.$BUILD_ID'
+                    sh 'docker image tag $JOB_NAME:v1.$BUILD_ID harest/$JOB_NAME:latest'
+
+                }
+            }
+        }
     }
 
 }
