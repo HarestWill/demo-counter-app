@@ -18,106 +18,106 @@ pipeline{
             }
         }
 
-        stage("Integration testing"){
+        // stage("Integration testing"){
 
-            steps{
-                sh 'mvn verify -DskipUnitTests'
-            }
-        }
+        //     steps{
+        //         sh 'mvn verify -DskipUnitTests'
+        //     }
+        // }
 
-        stage('Maven Build'){
+        // stage('Maven Build'){
 
-            steps{
-                sh 'mvn clean install'
-            }
-        }
+        //     steps{
+        //         sh 'mvn clean install'
+        //     }
+        // }
 
-        stage('Maven Test'){
+        // stage('Maven Test'){
 
-            steps{
-                sh 'mvn test'
-            }
-        }
+        //     steps{
+        //         sh 'mvn test'
+        //     }
+        // }
 
-        stage('Checkstyle Analysis'){
+        // stage('Checkstyle Analysis'){
 
-            steps{
-                sh 'mvn checkstyle:checkstyle'
-            }
-        }
+        //     steps{
+        //         sh 'mvn checkstyle:checkstyle'
+        //     }
+        // }
 
-        stage('SonarQube analysis'){
+        // stage('SonarQube analysis'){
 
-            steps{
-                script{
-                    withSonarQubeEnv(credentialsId: 'MySonarToken') {
-                    sh 'mvn clean package sonar:sonar'
-                }
-                }
-            }
-        }
+        //     steps{
+        //         script{
+        //             withSonarQubeEnv(credentialsId: 'MySonarToken') {
+        //             sh 'mvn clean package sonar:sonar'
+        //         }
+        //         }
+        //     }
+        // }
 
-        stage('Quality Gates'){
+        // stage('Quality Gates'){
 
-            steps{
-                script{
-                    waitForQualityGate abortPipeline: false, credentialsId: 'MySonarToken'
-                }
-            }
-        }
+        //     steps{
+        //         script{
+        //             waitForQualityGate abortPipeline: false, credentialsId: 'MySonarToken'
+        //         }
+        //     }
+        // }
 
-        stage('Upload jar file to Nexus'){
+        // stage('Upload jar file to Nexus'){
 
-            steps{
-                script{
-                    def readPomVersion = readMavenPom file: 'pom.xml'
+        //     steps{
+        //         script{
+        //             def readPomVersion = readMavenPom file: 'pom.xml'
 
-                    def nexusRepo = readPomVersion.version.endsWith("SNAPSHOT") ? "demoapp-snapshot" : "demoapp-release"
-                    nexusArtifactUploader artifacts: [
-                        [
-                            artifactId: 'springboot', 
-                            classifier: '', file: 'target/Uber.jar', 
-                            type: 'jar'
-                            ]
-                            ], 
-                            credentialsId: 'nexus-auth', 
-                            groupId: 'com.example', 
-                            nexusUrl: '3.231.219.97:8081', 
-                            nexusVersion: 'nexus3', 
-                            protocol: 'http', 
-                            repository: nexusRepo, 
-                            version: "${readPomVersion.version}"
-                }
-            }
-        }
+        //             def nexusRepo = readPomVersion.version.endsWith("SNAPSHOT") ? "demoapp-snapshot" : "demoapp-release"
+        //             nexusArtifactUploader artifacts: [
+        //                 [
+        //                     artifactId: 'springboot', 
+        //                     classifier: '', file: 'target/Uber.jar', 
+        //                     type: 'jar'
+        //                     ]
+        //                     ], 
+        //                     credentialsId: 'nexus-auth', 
+        //                     groupId: 'com.example', 
+        //                     nexusUrl: '3.231.219.97:8081', 
+        //                     nexusVersion: 'nexus3', 
+        //                     protocol: 'http', 
+        //                     repository: nexusRepo, 
+        //                     version: "${readPomVersion.version}"
+        //         }
+        //     }
+        // }
 
-        stage('Docker Image build'){
+        // stage('Docker Image build'){
 
-            steps{
+        //     steps{
 
-                script {
-                    sh 'docker image build -t $JOB_NAME:v1.$BUILD_ID .'
-                    sh 'docker image tag $JOB_NAME:v1.$BUILD_ID harest/$JOB_NAME:v1.$BUILD_ID'
-                    sh 'docker image tag $JOB_NAME:v1.$BUILD_ID harest/$JOB_NAME:latest'
+        //         script {
+        //             sh 'docker image build -t $JOB_NAME:v1.$BUILD_ID .'
+        //             sh 'docker image tag $JOB_NAME:v1.$BUILD_ID harest/$JOB_NAME:v1.$BUILD_ID'
+        //             sh 'docker image tag $JOB_NAME:v1.$BUILD_ID harest/$JOB_NAME:latest'
 
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
 
-        stage('Push Image to DockerHub'){
+        // stage('Push Image to DockerHub'){
 
-            steps{
+        //     steps{
 
-                script{
-                    withCredentials([string(credentialsId: 'git_cred', variable: 'docker_hub_cred')]) {
+        //         script{
+        //             withCredentials([string(credentialsId: 'git_cred', variable: 'docker_hub_cred')]) {
 
-                        sh 'docker login -u harest -p ${docker_hub_cred}'
-                        sh 'docker image push harest/$JOB_NAME:v1.$BUILD_ID'
-                        sh 'docker image push harest/$JOB_NAME:latest'
+        //                 sh 'docker login -u harest -p ${docker_hub_cred}'
+        //                 sh 'docker image push harest/$JOB_NAME:v1.$BUILD_ID'
+        //                 sh 'docker image push harest/$JOB_NAME:latest'
  
-                        }
-                    }
-                }
-            }
+        //                 }
+        //             }
+        //         }
+        //     }
         }
     }
